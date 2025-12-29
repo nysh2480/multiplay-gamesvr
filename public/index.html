@@ -25,18 +25,19 @@
         const msgContainer = document.getElementById('messages');
 
         socket.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-
-            // 1. 接続直後に届く過去ログ（履歴）の処理
-            if (data.type === 'history') {
-                data.data.forEach(item => {
-                    addMessageToScreen(item.content, true);
-                });
-                return;
+            let data;
+            try {
+                // 履歴（JSON）か、リアルタイムの生文字列かを判定
+                data = JSON.parse(event.data);
+            } catch (e) {
+                data = event.data;
             }
 
-            // 2. リアルタイムで届くメッセージの処理
-            addMessageToScreen(event.data);
+            if (data.type === 'history') {
+                data.data.forEach(item => addMessageToScreen(item.content, true));
+            } else {
+                addMessageToScreen(event.data);
+            }
         };
 
         function send() {
