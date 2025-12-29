@@ -43,8 +43,12 @@ wss.on('connection', async (ws) => {
 
   // 接続時に過去のメッセージをDBから取得して送る
   try {
-    const res = await pool.query('SELECT content FROM messages ORDER BY id DESC LIMIT 50');
-    ws.send(JSON.stringify({ type: 'history', data: res.rows.reverse() }));
+    // index.js の接続時の処理
+const res = await pool.query('SELECT content, created_at FROM messages ORDER BY id DESC LIMIT 50');
+ws.send(JSON.stringify({ 
+    type: 'history', 
+    data: res.rows.reverse() // ここに created_at が含まれるようになる
+}));
   } catch (err) {
     console.error("DB Select Error:", err);
   }
