@@ -15,13 +15,14 @@ const pool = new Pool({
 // 2. テーブルの自動作成（掲示板用のテーブル）
 async function initDB() {
   try {
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS messages (
-        id SERIAL PRIMARY KEY,
-        content TEXT NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      );
-    `);
+    // index.js の initDB 内
+await pool.query(`
+  CREATE TABLE IF NOT EXISTS messages (
+    id SERIAL PRIMARY KEY,
+    content TEXT NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP -- TZ付きに変更
+  );
+`);
     console.log("Database Table Ready");
   } catch (err) {
     console.error("DB Init Error:", err);
