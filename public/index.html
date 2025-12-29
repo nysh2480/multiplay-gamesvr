@@ -48,13 +48,23 @@
             }
         }
 
-        function addMessageToScreen(text, isHistory = false) {
-            const div = document.createElement('div');
-            div.className = 'msg';
-            div.textContent = (isHistory ? "[過去] " : "[新着] ") + text;
-            msgContainer.appendChild(div);
-            msgContainer.scrollTop = msgContainer.scrollHeight; // 常に最新へスクロール
-        }
+// public/index.html の addMessageToScreen 関数を改造
+function addMessageToScreen(text, isHistory = false, timestamp = null) {
+    const div = document.createElement('div');
+    div.className = 'msg';
+    
+    // 時間を表示用に変換
+    let timeStr = "";
+    if (timestamp) {
+        const date = new Date(timestamp);
+        // 日本の書式で時間を抽出 (例: 12:34:56)
+        timeStr = ` [${date.toLocaleTimeString('ja-JP')}] `;
+    }
+
+    div.textContent = (isHistory ? "[過去]" : "[新着]") + timeStr + text;
+    msgContainer.appendChild(div);
+    msgContainer.scrollTop = msgContainer.scrollHeight;
+}
     </script>
 </body>
 </html>
