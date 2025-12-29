@@ -1,10 +1,59 @@
 <!DOCTYPE html>
 <html>
-  <head>
+<head>
     <meta charset="UTF-8">
-    <title>GBL Test Server</title>
-  </head>
-  <body>
-    <h1>Hello GBL Test Server !!!</h1>
-  </body>
+    <title>Multiplay MVP Test</title>
+    <style>
+        body { font-family: sans-serif; margin: 20px; }
+        #messages { border: 1px solid #ccc; height: 300px; overflow-y: scroll; padding: 10px; margin-bottom: 10px; background: #f9f9f9; }
+        .msg { margin-bottom: 5px; padding: 5px; border-bottom: 1px solid #eee; }
+        input { width: 70%; padding: 10px; }
+        button { padding: 10px 20px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h2>DB連携マルチプレイ・チャットテスト</h2>
+    <div id="messages"></div>
+    <input type="text" id="input" placeholder="メッセージを入力...">
+    <button onclick="send()">送信</button>
+
+    <script>
+        // 自分のURLに合わせて自動でwssかwsかを選択します
+        const protocol = location.protocol === 'https:' ? 'wss' : 'ws';
+        const socket = new WebSocket(`${protocol}://${location.host}`);
+
+        const msgContainer = document.getElementById('messages');
+
+        socket.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+
+            // 1. 接続直後に届く過去ログ（履歴）の処理
+            if (data.type === 'history') {
+                data.data.forEach(item => {
+                    addMessageToScreen(item.content, true);
+                });
+                return;
+            }
+
+            // 2. リアルタイムで届くメッセージの処理
+            addMessageToScreen(event.data);
+        };
+
+        function send() {
+            const input = document.getElementById('input');
+            if (input.value) {
+                socket.send(input.value); // サーバーへ送信
+                input.value = '';
+            }
+        }
+
+        function addMessageToScreen(text, isHistory = false) {
+            const div = document.createElement('div');
+            div.className = 'msg';
+            div.textContent = (isHistory ? "[過去] " : "[新着] ") + text;
+            msgContainer.appendChild(div);
+            msgContainer.scrollTop = msgContainer.scrollHeight; // 常に最新へスクロール
+        }
+    </script>
+</body>
 </html>
