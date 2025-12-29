@@ -27,16 +27,24 @@
         socket.onmessage = (event) => {
             let data;
             try {
-                // 履歴（JSON）か、リアルタイムの生文字列かを判定
                 data = JSON.parse(event.data);
             } catch (e) {
-                data = event.data;
+                // JSONでない場合はただの文字列として扱う
+                data = { content: event.data }; 
             }
 
+            // 1. 履歴（過去データ）の場合
             if (data.type === 'history') {
-                data.data.forEach(item => addMessageToScreen(item.content, true));
-            } else {
-                addMessageToScreen(event.data);
+                data.data.forEach(item => {
+                    // 第3引数にデータベースから届いた created_at を渡す
+                    addMessageToScreen(item.content, true, item.created_at);
+                });
+            } 
+            // 2. リアルタイムの新着メッセージの場合
+            else {
+                // 第3引数に「今」の時間を渡す
+                const text = typeof data === 'string' ? data : data.content;
+                addMessageToScreen(text, false, new Date());
             }
         };
 
